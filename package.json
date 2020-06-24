@@ -1,0 +1,19 @@
+{
+  "name": "meat-node-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "dev": "ts-node-dev --respawn --transpileOnly --ignore-watch node_modules --no-notify src/server.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/restify": "5.0.6",
+    "ts-node-dev": "^1.0.0-pre.49"
+  },
+  "dependencies": {
+    "restify": "8.5.1"
+  }
+}
