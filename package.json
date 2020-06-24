@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpileOnly --ignore-watch node_modules --no-notify src/server.ts"
+    "dev": "ts-node-dev --respawn --transpileOnly --ignore-watch node_modules --no-notify src/main.ts"
   },
   "keywords": [],
   "author": "",

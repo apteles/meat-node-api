@@ -1,10 +1,17 @@
 import * as Restify from 'restify'
 import {env} from '../common/env'
+import Router from '../common/router'
+
+export type TServer = {
+  application: Restify.Server,
+  initRoutes(routers: Router[]): Promise<any>,
+  bootstrap(routers: Router[]): Promise<Server>,
+}
 export class Server{
 
   application: Restify.Server
 
-  initRoutes(): Promise<any>{
+  initRoutes(routers: Router[]): Promise<any>{
     return new Promise((resolve,reject)=>{
       try {
         this.application = Restify.createServer({
@@ -14,11 +21,7 @@ export class Server{
 
         this.application.use(Restify.plugins.queryParser())
 
-        this.application.get('/', (req,res,next) => {
-          res.json({message: 'hello'})
-        
-          return next()
-        })
+        routers.forEach((router:Router) => router.applyRoutes(this.application))
 
         this.application.listen(env.server.port, () => resolve(this.application))
       } catch (error) {
@@ -27,7 +30,7 @@ export class Server{
     })
   }
 
-  async bootstrap(): Promise<Server>{
-    return this.initRoutes().then( () => this)
+  async bootstrap(routers: Router[] = []): Promise<Server>{    
+    return this.initRoutes(routers).then( () => this)
   }
 }
