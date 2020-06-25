@@ -1,15 +1,22 @@
 import {Server, Request, Response, Next} from 'restify';
 import Router from '../common/router'
 import User from '../users/users.model'
+import { Query } from 'mongoose';
 
 class UsersRouter extends Router{
+
+  constructor(){
+    super()
+    this.on('beforeRender', document => {
+      document.password = undefined
+    })
+  }
+
   applyRoutes(application: Server) {
      application.get('/users', async (req:Request,res:Response,next:Next) => {
      
       const users = await User.find();
-      res.json(users);
-      
-      return next();
+      return this.render(res,next)(users)
 
     });  
 
@@ -17,9 +24,7 @@ class UsersRouter extends Router{
 
       const user = await User.findById(req.params.id)
 
-      if(!user) res.send(404,'Data not found'); next();
-        res.json(user);
-        return next();
+      return this.render(res,next)(user)
     
     });  
 
@@ -28,8 +33,7 @@ class UsersRouter extends Router{
       let user = new User(req.body);
       user = await user.save()
       
-      res.json(user);
-      return next();
+      return this.render(res,next)(user)
     
     });  
 
@@ -48,14 +52,23 @@ class UsersRouter extends Router{
     application.patch('/users/:id', async (req:Request,res:Response,next:Next) => {
 
     const user = await User.findByIdAndUpdate( req.params.id,req.body,{new: true})
-     if(user){
-      res.json(user);
-      return next();
-     }
-     res.send(404)
-     return next()
+
+    return this.render(res,next)(user)
     
     }); 
+
+    application.del('/users/:id', async (req:Request,res:Response,next:Next) => {
+
+      const user:any = await User.remove( {_id: req.params.id},req.body )
+        
+      if(user.ok){
+       res.json(204);
+       return next();
+      }
+      res.send(404)
+      return next()
+      
+      }); 
   }
 }
 
