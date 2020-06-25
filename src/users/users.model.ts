@@ -1,15 +1,23 @@
-const users = [
-  {id: "1",name: 'foo', email: 'foo@gmail.com'},
-  {id: "2",name: 'bar', email: 'bar@gmail.com'},
-];
+import {Schema,model,Document} from 'mongoose'
 
-export default class User{
-  
-  static findAll(): Promise<any[]>{
-    return Promise.resolve(users)
-  }
-
-  static findById(id: string): Promise<any[]>{
-    return Promise.resolve(users.filter(v => v.id === id))
-  }
+export interface User extends Document{
+  name: string,
+  email: string,
+  password: string,
 }
+
+const UserSchema = new Schema({
+  name:{
+    type: String
+  },
+  email: {
+    type: String,
+    unique: true
+  },
+  password: {
+    type: String,
+    select: false
+  }
+})
+
+export default model<User>('User', UserSchema)
