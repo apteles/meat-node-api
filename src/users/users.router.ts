@@ -44,6 +44,18 @@ class UsersRouter extends Router{
      
     
     }); 
+
+    application.patch('/users/:id', async (req:Request,res:Response,next:Next) => {
+
+    const user = await User.findByIdAndUpdate( req.params.id,req.body,{new: true})
+     if(user){
+      res.json(user);
+      return next();
+     }
+     res.send(404)
+     return next()
+    
+    }); 
   }
 }
 

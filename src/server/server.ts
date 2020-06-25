@@ -2,6 +2,7 @@ import * as Restify from 'restify'
 import {connect, MongooseThenable,ConnectionOptions} from 'mongoose'
 import {env} from '../common/env'
 import Router from '../common/router'
+import mergePathParser from './merge-path.parser';
 
 export type TServer = {
   application: Restify.Server,
@@ -30,6 +31,7 @@ export class Server{
 
         this.application.use(Restify.plugins.queryParser())
         this.application.use(Restify.plugins.bodyParser())
+        this.application.use(mergePathParser)
 
         routers.forEach((router:Router) => router.applyRoutes(this.application))
 
