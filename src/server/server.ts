@@ -1,4 +1,5 @@
 import * as Restify from 'restify'
+import {connect, MongooseThenable,ConnectionOptions} from 'mongoose'
 import {env} from '../common/env'
 import Router from '../common/router'
 
@@ -10,6 +11,13 @@ export type TServer = {
 export class Server{
 
   application: Restify.Server
+
+  initializeDB():MongooseThenable{
+    return connect(<string>env.db.url,<ConnectionOptions>{
+      useNewUrlParser:  true,
+      useUnifiedTopology: true
+    })      
+  }
 
   initRoutes(routers: Router[]): Promise<any>{
     return new Promise((resolve,reject)=>{
@@ -31,6 +39,7 @@ export class Server{
   }
 
   async bootstrap(routers: Router[] = []): Promise<Server>{    
-    return this.initRoutes(routers).then( () => this)
+    return this.initializeDB().then(() =>  this.initRoutes(routers).then( () => this))
+    
   }
 }
