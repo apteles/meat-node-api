@@ -1,4 +1,5 @@
 import {Request,Response,Next} from 'restify'
+import { BadRequestError } from 'restify-errors'
 
 const mpContentType = 'application/merge-patch+json';
 
@@ -8,7 +9,7 @@ export default (req:Request, res:Response, next: Next) => {
     try {
       req.body = JSON.parse(req.body)
     } catch (error) {
-      return next(new Error(`Invalid content: ${error.message}`))
+      return next(new BadRequestError(`Invalid content: ${error.message}`))
     }
 
   }

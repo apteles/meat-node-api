@@ -1,4 +1,5 @@
 import {Server, Request, Response, Next} from 'restify';
+import { NotFoundError } from 'restify-errors'
 import Router from '../common/router'
 import User from '../users/users.model'
 import { Query } from 'mongoose';
@@ -14,37 +15,51 @@ class UsersRouter extends Router{
 
   applyRoutes(application: Server) {
      application.get('/users', async (req:Request,res:Response,next:Next) => {
-     
-      const users = await User.find();
-      return this.render(res,next)(users)
-
+      try {
+        const users = await User.find();
+        return this.render(res,next)(users)
+      } catch (error) {
+        next(error)
+      }
     });  
 
     application.get('/users/:id', async (req:Request,res:Response,next:Next) => {
 
-      const user = await User.findById(req.params.id)
-
-      return this.render(res,next)(user)
+      try {
+        const user = await User.findById(req.params.id)
+  
+        return this.render(res,next)(user)
+      } catch (error) {
+          next(error)
+      }
     
     });  
 
     application.post('/users', async (req:Request,res:Response,next:Next) => {
 
-      let user = new User(req.body);
-      user = await user.save()
-      
-      return this.render(res,next)(user)
+      try {
+        let user = new User(req.body);
+        user = await user.save()
+        
+        return this.render(res,next)(user)
+      } catch (error) {
+        next(error)
+      }
+    
     
     });  
 
     application.put('/users/:id', async (req:Request,res:Response,next:Next) => {
 
       const user = await User.update({_id: req.params.id},req.body, {overwrite: true})
+
      if(user.ok){
       res.json(await User.findById(req.params.id));
 
       return next();
      }
+     
+     throw new NotFoundError('Document not found');
      
     
     }); 

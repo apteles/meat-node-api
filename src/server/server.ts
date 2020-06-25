@@ -3,6 +3,7 @@ import {connect, MongooseThenable,ConnectionOptions} from 'mongoose'
 import {env} from '../common/env'
 import Router from '../common/router'
 import mergePathParser from './merge-path.parser';
+import handleError from './error.handler';
 
 export type TServer = {
   application: Restify.Server,
@@ -36,6 +37,9 @@ export class Server{
         routers.forEach((router:Router) => router.applyRoutes(this.application))
 
         this.application.listen(env.server.port, () => resolve(this.application))
+
+        this.application.on('restifyError',handleError)
+
       } catch (error) {
         reject(error)
       }
