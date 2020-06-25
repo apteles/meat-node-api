@@ -15,7 +15,8 @@ export class Server{
   initializeDB():MongooseThenable{
     return connect(<string>env.db.url,<ConnectionOptions>{
       useNewUrlParser:  true,
-      useUnifiedTopology: true
+      useUnifiedTopology: true,
+      useCreateIndex: true
     })      
   }
 
@@ -28,6 +29,7 @@ export class Server{
         })
 
         this.application.use(Restify.plugins.queryParser())
+        this.application.use(Restify.plugins.bodyParser())
 
         routers.forEach((router:Router) => router.applyRoutes(this.application))
 
