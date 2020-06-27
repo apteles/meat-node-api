@@ -1,11 +1,15 @@
 import { Request, Response, Next} from 'restify';
 import { NotFoundError } from 'restify-errors'
-import {Model, Document,Types} from 'mongoose'
+import {Model, Document,Types, DocumentQuery} from 'mongoose'
 import Router from './router'
 
 export default abstract class ModelRouter<D extends Document> extends Router{
     constructor(protected model: Model<D>){
       super()
+    }
+
+    protected prepareOne(query:DocumentQuery<D,D>):DocumentQuery<D,D>{
+      return query
     }
 
     validateId = (req:Request,res:Response,next:Next) => {
@@ -29,7 +33,7 @@ export default abstract class ModelRouter<D extends Document> extends Router{
     findById = async (req:Request,res:Response,next:Next) => {
 
       try {
-        const model = await this.model.findById(req.params.id)
+        const model = await this.prepareOne(this.model.findById(req.params.id))
   
         return this.render(res,next)(model)
       } catch (error) {
