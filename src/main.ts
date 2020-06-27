@@ -1,8 +1,10 @@
 import {Server} from './server/server'
 import usersRouter from './users/users.router'
+import restaurantsRouter from './restaurants/restaurants.router'
 
 const routes = [
-  usersRouter
+  usersRouter,
+  restaurantsRouter
 ];
 
 const server = new Server
