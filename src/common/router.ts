@@ -15,4 +15,17 @@ export default abstract class Router extends EventEmitter{
       return next();
     }
   }
+
+  renderAll(response:Response, next: Next){
+    return (documents: any[]) => {
+      if(documents){
+        documents.forEach( d => {
+          this.emit('beforeRender', document)
+        })
+        return response.json(documents)
+      }else{
+        return response.json([])
+      }
+    }
+  }
 }

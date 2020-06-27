@@ -1,7 +1,7 @@
 import {Schema,model,Document} from 'mongoose'
 import {validateCPF} from '../common/validators'
 import * as bcrypt from 'bcrypt'
-export interface User extends Document{
+export interface TUser extends Document{
   name: string,
   email: string,
   password: string,
@@ -40,16 +40,32 @@ const UserSchema = new Schema({
   }
 })
 
-UserSchema.pre('save', function(next){
-  const user: User = this
+const hasPassword = (obj, next) => {
+  bcrypt.hash(obj.password,10).then(hash => {
+    obj.password = hash
+    next()
+  }).catch(next)
+}
+
+const saveMiddleware = function (next){
+  const user: TUser = this
   if(!user.isModified('password')){
     next()
   }else{
-    bcrypt.hash(user.password,10).then(hash => {
-      user.password = hash
-      next()
-    }).catch(next)
+    hasPassword(user,next)
   }
-})
+}
+const updateMiddleware = function(next){
+  if(!this.getUpdate().password){
+    next()
+  }else{
+    hasPassword(this.getUpdate(),next)
+  }
+}
 
-export default model<User>('User', UserSchema)
+UserSchema.pre('save', saveMiddleware)
+
+UserSchema.pre('findOneAndUpdate', updateMiddleware)
+UserSchema.pre('update', updateMiddleware)
+
+export default model<TUser>('User', UserSchema)
