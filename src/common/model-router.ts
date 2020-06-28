@@ -7,6 +7,8 @@ export default abstract class ModelRouter<D extends Document> extends Router{
     
     protected basePath:string
 
+    protected pageSize:number = 4
+
     constructor(protected model: Model<D>){
       super()
       this.basePath = `/${this.model.collection.name}`
@@ -18,6 +20,26 @@ export default abstract class ModelRouter<D extends Document> extends Router{
       return resource
     }
 
+    envelopeAll(documents: any[], options:any = {}): any{
+      const resource: any = {
+        _links:{
+          self: ``
+        },
+        items: documents
+      }
+      if(options.page && options.count && options.pageSize){
+        const remaining = options.count - (options.page * options.pageSize)
+
+        if(remaining > 0){
+          resource._links.next = `${this.basePath}?_page=${options.page+1}`
+        }
+
+        if(options.page > 1){
+          resource._links.previous = `${this.basePath}?_page=${options.page-1}`
+        }
+      }
+      return resource
+    }  
     
 
     protected prepareOne(query:DocumentQuery<D,D>):DocumentQuery<D,D>{
@@ -34,9 +56,15 @@ export default abstract class ModelRouter<D extends Document> extends Router{
     }
 
     findAll = async (req:Request,res:Response,next:Next) => {
+      let page = parseInt(req.query._page || 1)
+      page = page > 0 ? page : 1
+
+      const skipPage = (page - 1) * this.pageSize
       try {
-        const model = await this.model.find();
-        return this.renderAll(res,next)(model)
+        const model = await this.model.find().skip(skipPage).limit(this.pageSize);
+        const count = await this.model.count({})
+
+        return this.renderAll(res,next, {page,count, pageSize: this.pageSize, url: req.url})(model)
       } catch (error) {
         next(error)
       }
