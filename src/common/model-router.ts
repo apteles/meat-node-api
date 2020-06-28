@@ -4,9 +4,21 @@ import {Model, Document,Types, DocumentQuery} from 'mongoose'
 import Router from './router'
 
 export default abstract class ModelRouter<D extends Document> extends Router{
+    
+    protected basePath:string
+
     constructor(protected model: Model<D>){
       super()
+      this.basePath = `/${this.model.collection.name}`
     }
+
+    envelope(document: any):any{
+      let resource = Object.assign({_links:{}}, document.toJSON())
+      resource._links.self = `${this.basePath}/${resource._id}`
+      return resource
+    }
+
+    
 
     protected prepareOne(query:DocumentQuery<D,D>):DocumentQuery<D,D>{
       return query
@@ -24,7 +36,7 @@ export default abstract class ModelRouter<D extends Document> extends Router{
     findAll = async (req:Request,res:Response,next:Next) => {
       try {
         const model = await this.model.find();
-        return this.render(res,next)(model)
+        return this.renderAll(res,next)(model)
       } catch (error) {
         next(error)
       }

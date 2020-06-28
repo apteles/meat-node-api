@@ -12,6 +12,14 @@ class ReviewsRouter extends ModelRouter<IReview> {
     })
   }
 
+  envelope(document: any):any{
+    let resource = super.envelope(document)
+    const restID = document.restaurant._id || document.restaurant 
+    resource._links.restaurant = `/restaurants/${restID}`
+    return resource
+  }
+
+
   // findById = async (req:Request,res:Response,next:Next) => {
   //   try {
   //     const model = await this.model.findById(req.params.id).populate('user','name').populate('restaurant')

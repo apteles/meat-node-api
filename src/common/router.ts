@@ -4,11 +4,15 @@ import {EventEmitter} from 'events'
 export default abstract class Router extends EventEmitter{
   abstract applyRoutes(application: Server):void
 
+  envelope(document: any):any{
+    return document
+  }
+
   render(response:Response, next: Next){
     return document => {
       if(document){
         this.emit('beforeRender',document)
-        response.json(document)
+        response.json(this.envelope(document))
       }else{
         throw new NotFoundError('Document not found');
       }
@@ -19,9 +23,12 @@ export default abstract class Router extends EventEmitter{
   renderAll(response:Response, next: Next){
     return (documents: any[]) => {
       if(documents){
-        documents.forEach( d => {
-          this.emit('beforeRender', document)
-        })
+        documents.forEach( (doc,index, arr) => {
+          this.emit('beforeRender', doc)
+         
+          arr[index] = this.envelope(doc)
+         
+        })         
         return response.json(documents)
       }else{
         return response.json([])

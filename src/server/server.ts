@@ -27,7 +27,7 @@ export class Server{
       try {
         this.application = Restify.createServer({
           name:'meat-api',
-          version: '1.0.0'
+          versions: ['1.0.0', '2.0.0']
         })
 
         this.application.use(Restify.plugins.queryParser())
