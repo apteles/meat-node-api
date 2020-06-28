@@ -1,5 +1,5 @@
 import * as Restify from 'restify'
-import {connect, MongooseThenable,ConnectionOptions} from 'mongoose'
+import * as mongoose from 'mongoose'
 import {env} from '../common/env'
 import Router from '../common/router'
 import mergePathParser from './merge-path.parser';
@@ -14,8 +14,8 @@ export class Server{
 
   application: Restify.Server
 
-  initializeDB():MongooseThenable{
-    return connect(<string>env.db.url,<ConnectionOptions>{
+  initializeDB():mongoose.MongooseThenable{
+    return mongoose.connect(<string>env.db.url,<mongoose.ConnectionOptions>{
       useNewUrlParser:  true,
       useUnifiedTopology: true,
       useCreateIndex: true
@@ -47,7 +47,11 @@ export class Server{
   }
 
   async bootstrap(routers: Router[] = []): Promise<Server>{    
-    return this.initializeDB().then(() =>  this.initRoutes(routers).then( () => this))
-    
+    return this.initializeDB().then(() =>  this.initRoutes(routers).then( () => this)) 
+  }
+
+  async shutdown(){
+    await mongoose.disconnect()
+    await this.application.close()
   }
 }
