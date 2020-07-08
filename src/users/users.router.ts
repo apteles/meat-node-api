@@ -2,6 +2,7 @@ import {Server, Request, Response, Next} from 'restify';
 
 import ModelRouter from '../common/model-router'
 import User, {TUser} from '../users/users.model'
+import {authenticate} from '../security/auth.handler'
 class UsersRouter extends ModelRouter<TUser> {
 
   constructor(){
@@ -34,6 +35,8 @@ class UsersRouter extends ModelRouter<TUser> {
     application.put(`${this.basePath}/:id`, [ this.validateId,this.replace]);
     application.patch(`${this.basePath}/:id`, [ this.validateId,this.update]);
     application.del(`${this.basePath}/:id`, [ this.validateId,this.delete]); 
+    
+    application.post(`${this.basePath}/authenticate`, authenticate);  
   }
 }
 

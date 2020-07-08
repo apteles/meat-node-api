@@ -15,7 +15,7 @@ export default abstract class ModelRouter<D extends Document> extends Router{
     }
 
     envelope(document: any):any{
-      let resource = Object.assign({_links:{}}, document.toJSON())
+      let resource = Object.assign({_links:{}}, document.toJSON() || document)
       resource._links.self = `${this.basePath}/${resource._id}`
       return resource
     }

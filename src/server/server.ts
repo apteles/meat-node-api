@@ -4,6 +4,7 @@ import {env} from '../common/env'
 import Router from '../common/router'
 import mergePathParser from './merge-path.parser';
 import handleError from './error.handler';
+import { tokenParser } from '../security/token.parse';
 
 export type TServer = {
   application: Restify.Server,
@@ -33,6 +34,7 @@ export class Server{
         this.application.use(Restify.plugins.queryParser())
         this.application.use(Restify.plugins.bodyParser())
         this.application.use(mergePathParser)
+        this.application.use(tokenParser)
 
         routers.forEach((router:Router) => router.applyRoutes(this.application))
 

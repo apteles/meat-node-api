@@ -1,12 +1,15 @@
-import {Schema,model,Document} from 'mongoose'
+import {Schema,model,Document,Model} from 'mongoose'
 import {validateCPF} from '../common/validators'
 import * as bcrypt from 'bcrypt'
 export interface TUser extends Document{
   name: string,
   email: string,
   password: string,
+  matches(password:string): boolean
 }
-
+export interface UserModel extends Model<TUser>{
+  findByEmail(email: string, projection?:string): Promise<TUser>
+}
 const UserSchema = new Schema({
   name:{
     type: String,
@@ -39,7 +42,12 @@ const UserSchema = new Schema({
     }
   }
 })
-
+UserSchema.statics.findByEmail = function(email: string, projection: string){
+  return this.findOne({email},projection)
+}
+UserSchema.methods.matches = function(password:string): boolean{
+  return bcrypt.compareSync(password,this.password)
+}
 const hasPassword = (obj, next) => {
   bcrypt.hash(obj.password,10).then(hash => {
     obj.password = hash
@@ -68,4 +76,4 @@ UserSchema.pre('save', saveMiddleware)
 UserSchema.pre('findOneAndUpdate', updateMiddleware)
 UserSchema.pre('update', updateMiddleware)
 
-export default model<TUser>('User', UserSchema)
+export default model<TUser,UserModel>('User', UserSchema)
