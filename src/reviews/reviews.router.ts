@@ -2,7 +2,7 @@ import {Server, Request, Response, Next} from 'restify';
 import {DocumentQuery} from 'mongoose'
 import ModelRouter from '../common/model-router'
 import Review, {IReview} from './reviews.model'
-
+import {authorize} from '../security/authz.handler'
 class ReviewsRouter extends ModelRouter<IReview> {
 
   constructor(){
@@ -36,7 +36,7 @@ class ReviewsRouter extends ModelRouter<IReview> {
   applyRoutes(application: Server) {
     application.get('/reviews', this.findAll);
     application.get('/reviews/:id', [ this.validateId, this.findById]);
-    application.post('/reviews', this.save);
+    application.post('/reviews', [authorize('user'),this.save]);
   }
 }
 

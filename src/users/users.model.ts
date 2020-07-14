@@ -5,7 +5,9 @@ export interface TUser extends Document{
   name: string,
   email: string,
   password: string,
-  matches(password:string): boolean
+  profiles: string[],
+  matches(password:string): boolean,
+  hasAny(...profiles: string[]): boolean
 }
 export interface UserModel extends Model<TUser>{
   findByEmail(email: string, projection?:string): Promise<TUser>
@@ -40,6 +42,10 @@ const UserSchema = new Schema({
       validator: validateCPF,
       message: '{PATH}: Invalid CPF({VALUE})'
     }
+  },
+  profiles:{
+    type: [String],
+    required: false 
   }
 })
 UserSchema.statics.findByEmail = function(email: string, projection: string){
@@ -47,6 +53,9 @@ UserSchema.statics.findByEmail = function(email: string, projection: string){
 }
 UserSchema.methods.matches = function(password:string): boolean{
   return bcrypt.compareSync(password,this.password)
+}
+UserSchema.methods.hasAny = function(...profiles:string[]): boolean{
+  return profiles.some(profile => this.profiles.indexOf(profile) !== -1 )
 }
 const hasPassword = (obj, next) => {
   bcrypt.hash(obj.password,10).then(hash => {
