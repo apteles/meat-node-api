@@ -1,5 +1,7 @@
 import * as Restify from 'restify'
 import * as mongoose from 'mongoose'
+import * as fs from 'fs'
+import * as path from 'path'
 import {env} from '../common/env'
 import Router from '../common/router'
 import mergePathParser from './merge-path.parser';
@@ -19,7 +21,8 @@ export class Server{
     return mongoose.connect(<string>env.db.url,<mongoose.ConnectionOptions>{
       useNewUrlParser:  true,
       useUnifiedTopology: true,
-      useCreateIndex: true
+      useCreateIndex: true,
+      useFindAndModify: false
     })      
   }
 
@@ -28,8 +31,13 @@ export class Server{
       try {
         this.application = Restify.createServer({
           name:'meat-api',
-          versions: ['1.0.0', '2.0.0']
+          versions: ['1.0.0', '2.0.0'],
+          //certificate: fs.readFileSync( path.join(__dirname, '..','security', 'keys','cert.pem')), 
+          //key: fs.readFileSync( path.join(__dirname, '..','security', 'keys','key.pem')),
+
         })
+        console.log(__dirname);
+        
 
         this.application.use(Restify.plugins.queryParser())
         this.application.use(Restify.plugins.bodyParser())

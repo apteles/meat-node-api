@@ -17,7 +17,7 @@ export const authenticate: restify.RequestHandler = (req,res,next) =>{
         email: user.email,
         token
       })
-      return next
+      return next()
     }else{
       return next(new NotAuthorizedError('Invalid credentials'))
     }
