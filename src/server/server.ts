@@ -3,11 +3,12 @@ import * as mongoose from 'mongoose'
 import * as fs from 'fs'
 import * as path from 'path'
 import {env} from '../common/env'
+import {logger} from '../common/logger'
 import Router from '../common/router'
 import mergePathParser from './merge-path.parser';
 import handleError from './error.handler';
 import { tokenParser } from '../security/token.parse';
-
+import User from '../users/users.model'
 export type TServer = {
   application: Restify.Server,
   initRoutes(routers: Router[]): Promise<any>,
@@ -32,13 +33,15 @@ export class Server{
         this.application = Restify.createServer({
           name:'meat-api',
           versions: ['1.0.0', '2.0.0'],
+          log: logger
           //certificate: fs.readFileSync( path.join(__dirname, '..','security', 'keys','cert.pem')), 
           //key: fs.readFileSync( path.join(__dirname, '..','security', 'keys','key.pem')),
 
         })
-        console.log(__dirname);
-        
-
+      
+        this.application.pre(Restify.plugins.requestLogger({ 
+          log: logger
+        }))
         this.application.use(Restify.plugins.queryParser())
         this.application.use(Restify.plugins.bodyParser())
         this.application.use(mergePathParser)
@@ -49,6 +52,14 @@ export class Server{
         this.application.listen(env.server.port, () => resolve(this.application))
 
         this.application.on('restifyError',handleError)
+        
+        this.application.on('after',Restify.plugins.auditLogger({
+           log: logger,
+           event: 'after',
+           body: true
+        }))
+
+      
 
       } catch (error) {
         reject(error)
